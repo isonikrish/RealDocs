@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-function Auth() {
+function Auth({user}) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [username, setUsername] = useState('');
@@ -31,7 +31,11 @@ function Auth() {
             toast.error(error.response?.data.error || 'Something went wrong!');
         }
     };
-
+    useEffect(()=>{
+        if(user){
+            navigate('/home');
+        }
+    },[user])
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-md w-96">

@@ -3,12 +3,22 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import authRoutes from './routes/auth.js'; // Assuming you have user routes set up in a separate file
+import authRoutes from './routes/auth.js'; 
+import http from 'http';
+import { Server } from 'socket.io';
 
-// Initialize dotenv to use environment variables
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: 'http://localhost:5173', // Your frontend's URL
+        methods: ['GET', 'POST'],
+        credentials: true, // Allow credentials (cookies) to be passed
+    },
+});
+
 const PORT = 3001;
 
 // Middleware setup
@@ -33,14 +43,29 @@ mongoose.connect(process.env.MONGO_URI, {
 });
 
 // Routes setup
-app.use('/api/auth', authRoutes); // Add user routes for login, signup, etc.
+app.use('/api/auth', authRoutes);
 
-// Default route
+io.on('connection', (socket) => {
+    socket.on('join-document',async (documentId)=>{
+        socket.join(documentId);
+
+        socket.on('send-changes', (changes) => {
+            socket.broadcast.to(documentId).emit('receive-changes', changes);
+        });
+        socket.on('load-document', async (docContent) => {
+            socket.broadcast.to(documentId).emit('load-document', docContent);
+        });
+    })
+
+    socket.on('disconnect', () => {
+        console.log('A user disconnected');
+    });
+});
 app.get('/', (req, res) => {
     res.send('Hello World');
 });
 
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
