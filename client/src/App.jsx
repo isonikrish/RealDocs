@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import Auth from './pages/auth';
-import Doc from './pages/doc';
+import Auth from './pages/Auth';
+import Doc from './pages/Doc';
 import { Toaster } from 'react-hot-toast';
 import axios from 'axios';
 function App() {
